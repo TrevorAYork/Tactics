@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Phaser - Making your first game, part 1</title>
+    <script src="//cdn.jsdelivr.net/phaser/2.4.4/phaser.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+    var game = new Phaser.Game(800, 800, Phaser.AUTO, '', {preload: preload, create: create, update: update});
+    var gameId;
+    var player;
+    var map;
+    var spriteID = Math.floor(Math.random() * 90);
+
+    var cursors;
+    function preload() {
+
+        game.load.tilemap('map', 'assets/map1.json', null, Phaser.Tilemap.TILED_JSON);
+        game.load.image('pokemonTiles', 'assets/pokemonBackground.bmp');
+        game.load.spritesheet('dude', 'assets/pokemonWalking.png', 32, 32);
+
+    }
+
+    function create() {
+
+        //  We're going to be using physics, so enable the Arcade Physics system
+        game.physics.startSystem(Phaser.Physics.ARCADE);
+        game.stage.disableVisibilityChange = true;
+
+        map = game.add.tilemap('map');
+
+        map.createLayer('Tile Layer 1');
+        map.addTilesetImage('pokemonBackground', 'pokemonTiles');
+
+        // The player and its settings
+        player = game.add.sprite(16, game.world.height - 150, 'dude');
+
+        //  We need to enable physics on the player
+        game.physics.arcade.enable(player);
+
+        var sprite = (spriteID % 9 * 2) + (Math.floor(spriteID / 9) * 72);
+        //  Our two animations, walking left and right.
+        player.animations.add('up', [sprite, sprite + 18], 6, true);
+        player.animations.add('down', [sprite + 36, sprite + 54], 6, true);
+        player.animations.add('left', [sprite + 1, sprite + 19], 6, true);
+        player.animations.add('right', [sprite + 37, sprite + 55], 6, true);
+
+        //  Our controls.
+        cursors = game.input.keyboard.createCursorKeys();
+
+        player.animations.play("down");
+    }
+
+    function update() {
+
+        if (cursors.left.isDown) {
+            //  Move to the left
+            $.post("/move/left/" + player.x + "/" + player.y, function (response) {
+                player.x = response.x;
+                player.y = response.y;
+            });
+
+            player.animations.play('left');
+        }
+        else if (cursors.right.isDown) {
+            //  Move to the right
+            $.post("/move/right/" + player.x + "/" + player.y, function (response) {
+                player.x = response.x;
+                player.y = response.y;
+            });
+
+            player.animations.play('right');
+        }
+        else if (cursors.up.isDown) {
+            //  Move to the right
+            $.post("/move/up/" + player.x + "/" + player.y, function (response) {
+                player.x = response.x;
+                player.y = response.y;
+            });
+
+            player.animations.play('up');
+        }
+        else if (cursors.down.isDown) {
+            //  Move to the right
+            $.post("/move/down/" + player.x + "/" + player.y, function (response) {
+                player.x = response.x;
+                player.y = response.y;
+            });
+
+            player.animations.play('down');
+        }
+    }
+
+</script>
+
+</body>
+</html>
